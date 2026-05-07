@@ -25,7 +25,6 @@ galaxypulse/
 |------|---------|---------|
 | Python | 3.11+ | [python.org](https://python.org) |
 | Node.js | 22 LTS | [nodejs.org](https://nodejs.org) |
-| PostgreSQL | 15+ | [postgresql.org](https://postgresql.org) |
 
 ---
 
@@ -37,14 +36,7 @@ py -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 
-# Copy and fill in environment variables
-copy .env.example .env
-
-# Run migrations / create tables (auto on startup in dev)
-# Seed mock data
-.\venv\Scripts\python seed.py
-
-# Start the API server
+# Start the API server (will automatically create SQLite db)
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -56,13 +48,25 @@ API docs available at: http://localhost:8000/docs
 
 ```powershell
 cd frontend
-npm install
+npm install --legacy-peer-deps
 npm run dev
 ```
 
 Dashboard available at: http://localhost:3000
 
-> **Note:** The Next.js dev server proxies all `/api/*` requests to the FastAPI backend at port 8000 automatically.
+---
+
+## Phone Agent Setup (Termux)
+
+1. Install Termux on your Android phone.
+2. Run `pkg update && pkg upgrade -y && pkg install nodejs git -y`
+3. Clone the repo: `git clone https://github.com/vishwapanchal/GalaxyPulse.git`
+4. Run:
+```bash
+cd GalaxyPulse/agent
+npm install
+node skills/feedback-conductor.js
+```
 
 ---
 
@@ -85,13 +89,21 @@ Dashboard available at: http://localhost:3000
 
 ---
 
+## Deployment (Hackathon Ready)
+
+- **Backend**: We included a `render.yaml` file in the root. Simply connect your GitHub repository to [Render.com](https://render.com) and it will automatically deploy the FastAPI server using SQLite.
+- **Frontend**: Go to [Vercel.com](https://vercel.com), import your GitHub repository, and click Deploy. It will automatically detect Next.js.
+  - *Make sure to update the `agent/skills/*.js` files to point to your new Render URL instead of `http://localhost:8000`!*
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Agent Runtime | OpenClaw (Termux, Android) |
 | LLM | Claude API (claude-sonnet-4) |
-| Backend | Python 3.14 + FastAPI + SQLAlchemy |
-| Database | PostgreSQL (asyncpg driver) |
+| Backend | Python 3.11+ + FastAPI + SQLAlchemy |
+| Database | SQLite (aiosqlite driver) |
 | Frontend | Next.js 15 + Tailwind CSS + Recharts |
-| Deployment | Railway (backend) + Vercel (frontend) |
+| Deployment | Render (backend) + Vercel (frontend) |
