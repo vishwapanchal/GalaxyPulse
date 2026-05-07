@@ -12,6 +12,7 @@ module.exports = async function feedbackConductor(input) {
   // We trigger the real conversation via the backend instead of mocking
   // IMPORTANT: You must configure your chat_id here or pass it in via input
   const chatId = process.env.TELEGRAM_CHAT_ID || 123456789; // Replace with your numeric Telegram chat ID
+  const apiUrl = process.env.API_URL || 'http://127.0.0.1:8000';
 
   const triggerData = {
     chat_id: parseInt(chatId),
@@ -20,7 +21,7 @@ module.exports = async function feedbackConductor(input) {
   };
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/feedback/trigger', triggerData);
+    const response = await axios.post(`${apiUrl}/api/feedback/trigger`, triggerData);
     console.log(`[Feedback Conductor] Successfully triggered real Telegram chat: ${response.status}`);
   } catch (error) {
     console.error(`[Feedback Conductor] Failed to trigger Telegram chat:`, error.message);
