@@ -1,0 +1,6 @@
+# deferred_sessions.yaml
+sessions:
+  - feature: "circle_to_search"
+    original_trigger_time: "2026-05-07T10:15:00+05:30"
+    reason: "stress_score_high"
+    rescheduled_for: "2026-05-07T12:15:00+05:30"

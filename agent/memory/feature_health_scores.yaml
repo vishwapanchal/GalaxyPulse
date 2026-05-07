@@ -1,0 +1,15 @@
+# feature_health_scores.yaml
+features:
+  - id: "ai_photo_erase"
+    name: "AI Photo Erase"
+    health_score: 68
+    trend: "down"
+  - id: "circle_to_search"
+    name: "Circle to Search"
+    health_score: 92
+    trend: "stable"
+  - id: "ai_wallpaper"
+    name: "AI Wallpaper"
+    health_score: 85
+    trend: "up"
+last_updated: "2026-05-07T12:00:00Z"
