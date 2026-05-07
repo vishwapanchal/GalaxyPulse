@@ -8,13 +8,17 @@ from app.db.database import create_tables
 from app.api.routes import feedback, features, ota, digest, cohorts
 
 
+from app.services.telegram_bot import start_telegram_bot, stop_telegram_bot
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown lifecycle."""
     logger.info("🚀 GalaxyPulse backend starting up...")
     await create_tables()
     logger.info("✅ Database tables ready")
+    await start_telegram_bot()
     yield
+    await stop_telegram_bot()
     logger.info("🛑 GalaxyPulse backend shutting down")
 
 

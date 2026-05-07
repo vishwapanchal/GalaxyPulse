@@ -82,3 +82,19 @@ async def _update_feature_health(db: AsyncSession, payload: FeedbackCreate):
         prev_rate = feature.friction_rate or 0.0
         n = min(feature.total_sessions, 50)
         feature.friction_rate = ((prev_rate * (n - 1)) + 1) / n
+
+from pydantic import BaseModel
+
+class TriggerRequest(BaseModel):
+    chat_id: int
+    feature: str
+    health_context: dict
+
+@router.post("/trigger", status_code=status.HTTP_202_ACCEPTED)
+async def trigger_feedback(payload: TriggerRequest):
+    """Trigger a real Telegram conversation from the Android agent."""
+    from app.services.telegram_bot import trigger_conversation
+    success = await trigger_conversation(payload.chat_id, payload.feature, payload.health_context)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to start Telegram conversation")
+    return {"status": "started"}
