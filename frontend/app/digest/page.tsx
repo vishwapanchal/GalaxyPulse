@@ -89,7 +89,7 @@ export default function DigestPage() {
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-white">{String(iss.feature ?? "Unknown")}</p>
                         <p className="text-xs text-slate-400 mt-0.5">{String(iss.issue ?? "")}</p>
-                        {iss.count && (
+                        {!!iss.count && (
                           <p className="text-xs text-slate-600 mt-1">{String(iss.count)} occurrences</p>
                         )}
                       </div>
