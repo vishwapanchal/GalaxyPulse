@@ -39,7 +39,7 @@ tg_application = None
 def generate_health_context():
     """Generate heuristic health context based on real signals (time of day)."""
     now = datetime.now()
-    hour = now.hours if hasattr(now, 'hours') else now.hour
+    hour = now.hour
 
     # Time of day
     if 7 <= hour < 12:

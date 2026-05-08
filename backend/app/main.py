@@ -9,6 +9,8 @@ from app.api.routes import feedback, features, ota, digest, cohorts
 
 
 from app.services.telegram_bot import start_telegram_bot, stop_telegram_bot
+from app.services.scheduler import start_scheduler, stop_scheduler
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,9 +19,12 @@ async def lifespan(app: FastAPI):
     await create_tables()
     logger.info("✅ Database tables ready")
     await start_telegram_bot()
+    start_scheduler()          # ← autonomous jobs: pings, alerts, digest
     yield
+    stop_scheduler()
     await stop_telegram_bot()
     logger.info("🛑 GalaxyPulse backend shutting down")
+
 
 
 app = FastAPI(
@@ -60,3 +65,29 @@ async def health():
 @app.get("/", include_in_schema=False)
 async def root():
     return {"message": "GalaxyPulse API — see /docs for the full API reference"}
+
+
+# ── Scheduler debug endpoints (demo helpers) ──────────────────────────────────
+@app.post("/api/scheduler/ping-now", tags=["Scheduler"])
+async def trigger_ping_now():
+    """Immediately trigger a proactive feedback ping (for demo/testing)."""
+    from app.services.scheduler import job_proactive_ping
+    await job_proactive_ping()
+    return {"status": "ping sent"}
+
+
+@app.post("/api/scheduler/digest-now", tags=["Scheduler"])
+async def trigger_digest_now():
+    """Immediately generate and send the weekly digest (for demo/testing)."""
+    from app.services.scheduler import job_weekly_digest
+    await job_weekly_digest()
+    return {"status": "digest generated"}
+
+
+@app.post("/api/scheduler/health-alert-now", tags=["Scheduler"])
+async def trigger_health_alert_now():
+    """Immediately run health alert check (for demo/testing)."""
+    from app.services.scheduler import job_health_alert
+    await job_health_alert()
+    return {"status": "health alert checked"}
+

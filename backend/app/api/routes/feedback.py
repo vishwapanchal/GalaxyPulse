@@ -72,16 +72,16 @@ async def _update_feature_health(db: AsyncSession, payload: FeedbackCreate):
 
     feature.total_sessions = (feature.total_sessions or 0) + 1
     if payload.satisfaction:
-        # Simple rolling average update
-        prev_avg = feature.avg_satisfaction_7d or payload.satisfaction
-        n = min(feature.total_sessions, 50)  # cap window for responsiveness
-        feature.avg_satisfaction_7d = ((prev_avg * (n - 1)) + payload.satisfaction) / n
-        # Health score: scale 1-5 satisfaction to 0-100
-        feature.health_score = ((feature.avg_satisfaction_7d - 1) / 4) * 100
+        n = min(feature.total_sessions, 50)  # responsive rolling window
+        prev_avg = feature.avg_satisfaction_7d or float(payload.satisfaction)
+        new_avg = ((prev_avg * (n - 1)) + payload.satisfaction) / n
+        feature.avg_satisfaction_7d  = round(new_avg, 3)
+        feature.avg_satisfaction_30d = round(new_avg, 3)   # mirrors 7d until we track separate windows
+        feature.health_score = round(((new_avg - 1) / 4) * 100, 1)
     if payload.friction:
-        prev_rate = feature.friction_rate or 0.0
         n = min(feature.total_sessions, 50)
-        feature.friction_rate = ((prev_rate * (n - 1)) + 1) / n
+        prev_rate = feature.friction_rate or 0.0
+        feature.friction_rate = round(((prev_rate * (n - 1)) + 1) / n, 4)
 
 from pydantic import BaseModel
 
