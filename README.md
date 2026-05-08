@@ -3,6 +3,8 @@
 ### Contextual Micro-Feedback Harvesting for Samsung Galaxy AI Features
 **PRISM OpenClaw Hackathon · Theme 2: Daily Utility (Smartphones)**
 
+### 📺 [Prototype Demo Video Link](https://drive.google.com/drive/folders/1foc44pPXYKj-wE_tSzdwN8CRrX2Rd_Qd?usp=sharing)
+
 ---
 
 ## What is GalaxyPulse?
