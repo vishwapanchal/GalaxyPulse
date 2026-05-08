@@ -9,6 +9,9 @@
  *
  * The actual Telegram conversation (send Q1, wait for reply, send Q2, wait, parse)
  * is handled by the backend's telegram_bot.py service using LLM-generated questions.
+ *
+ * NOTE: Users can also trigger feedback directly via Telegram /use command,
+ * bypassing this skill entirely. This skill is for the automated HEARTBEAT flow.
  */
 
 const axios = require('axios');
@@ -21,6 +24,22 @@ try { require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') 
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:8000';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+
+// ── Build version detection ──────────────────────────────────────────────────
+function detectBuildVersion() {
+  try {
+    // Try to read Android build version via Termux
+    const build = require('child_process')
+      .execSync('getprop ro.build.display.id', { timeout: 3000 })
+      .toString().trim();
+    if (build) return build;
+  } catch (e) {
+    // Not on Android — use generic label
+  }
+  return "Android 14 / Generic";
+}
+
+const BUILD_VERSION = detectBuildVersion();
 
 // ── Anti-Interrupt Rules ──────────────────────────────────────────────────────
 const DEFERRED_FILE = path.join(__dirname, '..', 'memory', 'deferred_sessions.yaml');
@@ -85,7 +104,7 @@ function writeFeedbackYAML(feature, healthContext) {
 
     const yamlData = {
       feature: featureSlug,
-      build_version: "One UI 7.0 / May OTA",
+      build_version: BUILD_VERSION,
       timestamp: new Date().toISOString(),
       context: {
         stress_score: healthContext.stress_score,
@@ -159,7 +178,7 @@ module.exports = async function feedbackConductor(input) {
 // If run directly from the command line (for testing)
 if (require.main === module) {
   const mockInput = {
-    feature: "AI Photo Erase",
+    feature: "Google Lens",
     health_context: {
       stress_score: 42,
       sleep_score: 78,

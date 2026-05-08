@@ -4,20 +4,33 @@
  *
  * On Android (Termux): reads `termux-usagestats` output.
  * On desktop / if Termux unavailable: falls back to DEMO MODE with simulated detection.
+ *
+ * Feature registry includes both Samsung Galaxy AI and generic Android AI apps,
+ * so the system works on ANY Android device — not just Samsung.
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// ── Galaxy AI Feature Package Registry ────────────────────────────────────────
+// ── Feature Package Registry (Samsung + Generic Android AI) ──────────────────
 const FEATURE_REGISTRY = {
+  // Samsung Galaxy AI (auto-detects on Samsung devices)
   "com.samsung.android.photostudio":          "AI Photo Erase",
   "com.samsung.android.app.notes":            "Note Assist",
   "com.samsung.android.wallpaper.res":        "AI Wallpaper",
   "com.samsung.android.livestranslate":       "Live Translate",
-  "com.google.android.googlequicksearchbox":  "Circle to Search"
+  // Generic Android AI (works on ANY Android device)
+  "com.google.android.googlequicksearchbox":  "Circle to Search",
+  "com.google.android.apps.translate":        "Google Translate AI",
+  "com.google.ar.lens":                       "Google Lens",
+  "com.google.android.apps.photos":           "Google Photos AI",
+  "com.google.android.tts":                   "Text-to-Speech AI",
+  "com.google.android.inputmethod.latin":     "Gboard Smart Compose",
 };
+
+// Exported for Telegram bot /features command
+const KNOWN_FEATURE_NAMES = [...new Set(Object.values(FEATURE_REGISTRY))];
 
 const MINIMUM_ENGAGEMENT_SEC = 3;   // Minimum 3 seconds in foreground
 const DEDUP_HOURS = 6;              // Same feature not re-triggered within 6 hours
@@ -63,7 +76,7 @@ function wasRecentlyTriggered(featureName, dedupState) {
 
 /**
  * Try to read Android UsageStats via Termux API.
- * Returns an array of detected Galaxy AI features, or null if Termux is unavailable.
+ * Returns an array of detected AI features (Samsung + generic), or null if Termux is unavailable.
  */
 function tryTermuxUsageStats(lookbackMinutes) {
   try {
@@ -103,11 +116,17 @@ function tryTermuxUsageStats(lookbackMinutes) {
 
 /**
  * DEMO MODE: Simulate a feature detection for testing purposes.
+ * Uses generic Android AI features so it works on any device.
  */
 function simulateDetection() {
-  console.log("DEMO MODE: simulating feature detection");
-  const features = Object.entries(FEATURE_REGISTRY);
-  const [pkg, name] = features[Math.floor(Math.random() * features.length)];
+  console.log("DEMO MODE: simulating feature detection (use Telegram /use command for real interaction)");
+  const genericFeatures = [
+    ["com.google.ar.lens", "Google Lens"],
+    ["com.google.android.apps.translate", "Google Translate AI"],
+    ["com.google.android.apps.photos", "Google Photos AI"],
+    ["com.google.android.googlequicksearchbox", "Circle to Search"],
+  ];
+  const [pkg, name] = genericFeatures[Math.floor(Math.random() * genericFeatures.length)];
   return [{
     package: pkg,
     feature_name: name,
@@ -143,9 +162,14 @@ module.exports = async function featureWatcher(input) {
   return filtered;
 };
 
+// Export known features list
+module.exports.KNOWN_FEATURE_NAMES = KNOWN_FEATURE_NAMES;
+module.exports.FEATURE_REGISTRY = FEATURE_REGISTRY;
+
 // If run directly (for testing)
 if (require.main === module) {
   module.exports({ lookback_minutes: 10 }).then((features) => {
     console.log("Detected features:", JSON.stringify(features, null, 2));
+    console.log("\nAll known features:", KNOWN_FEATURE_NAMES);
   });
 }

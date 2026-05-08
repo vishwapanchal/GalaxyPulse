@@ -33,7 +33,7 @@ def _get_client() -> AsyncOpenAI:
     return _client
 
 
-async def _chat(messages: list[dict], model: str = PRIMARY_MODEL, temperature: float = 0.7) -> str:
+async def _chat(messages: list[dict], model: str = PRIMARY_MODEL, temperature: float = 0.7, _is_fallback: bool = False) -> str:
     """Low-level chat completion with automatic fallback."""
     client = _get_client()
     try:
@@ -45,9 +45,10 @@ async def _chat(messages: list[dict], model: str = PRIMARY_MODEL, temperature: f
         )
         return response.choices[0].message.content or ""
     except Exception as e:
-        if model == PRIMARY_MODEL:
+        if not _is_fallback and FALLBACK_MODEL != model:
             logger.warning(f"Primary model failed ({e}), falling back to {FALLBACK_MODEL}")
-            return await _chat(messages, model=FALLBACK_MODEL, temperature=temperature)
+            return await _chat(messages, model=FALLBACK_MODEL, temperature=temperature, _is_fallback=True)
+        logger.error(f"LLM call failed (no further fallback): {e}")
         raise
 
 
