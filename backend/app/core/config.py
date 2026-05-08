@@ -4,7 +4,7 @@ import json
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
     # Server
     APP_ENV: str = "development"
@@ -30,6 +30,14 @@ class Settings(BaseSettings):
 
     # Rate limiting
     RATE_LIMIT_PER_MINUTE: int = 60
+
+    # Telegram Bot
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_CHAT_ID: str = ""
+    PM_TELEGRAM_CHAT_ID: str = ""
+
+    # Backend URL (for agent → backend calls)
+    BACKEND_URL: str = "http://localhost:8000"
 
     # OpenClaw
     OPENCLAW_WEBHOOK_SECRET: str = ""

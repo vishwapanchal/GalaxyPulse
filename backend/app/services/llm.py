@@ -1,8 +1,8 @@
 """
 GalaxyPulse LLM Service — OpenRouter Client
 Uses the OpenAI-compatible API pointed at OpenRouter.
-Primary model: google/gemini-2.0-flash-exp:free
-Fallback model: meta-llama/llama-4-maverick:free
+Primary model: meta-llama/llama-3.3-70b-instruct:free
+Fallback model: meta-llama/llama-3.3-70b-instruct:free
 """
 from openai import AsyncOpenAI
 from app.core.config import settings
@@ -10,22 +10,32 @@ from loguru import logger
 import json
 import re
 
-# ── OpenRouter client ─────────────────────────────────────────────────────────
-client = AsyncOpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=settings.OPENROUTER_API_KEY,
-    default_headers={
-        "HTTP-Referer": "https://galaxypulse.app",
-        "X-Title": "GalaxyPulse",
-    },
-)
+# ── OpenRouter client (lazy-initialized) ──────────────────────────────────────
+_client = None
 
 PRIMARY_MODEL  = settings.LLM_PRIMARY_MODEL
 FALLBACK_MODEL = settings.LLM_FALLBACK_MODEL
 
 
+def _get_client() -> AsyncOpenAI:
+    """Lazy-initialize the OpenRouter client so the app starts even without a key."""
+    global _client
+    if _client is None:
+        api_key = settings.OPENROUTER_API_KEY or "sk-placeholder"
+        _client = AsyncOpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+            default_headers={
+                "HTTP-Referer": "https://galaxypulse.app",
+                "X-Title": "GalaxyPulse",
+            },
+        )
+    return _client
+
+
 async def _chat(messages: list[dict], model: str = PRIMARY_MODEL, temperature: float = 0.7) -> str:
     """Low-level chat completion with automatic fallback."""
+    client = _get_client()
     try:
         response = await client.chat.completions.create(
             model=model,

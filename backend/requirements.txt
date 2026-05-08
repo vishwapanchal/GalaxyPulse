@@ -41,5 +41,4 @@ pytest==9.0.3
 pytest-asyncio==1.3.0
 
 # ── Third Party APIs ──────────────────────────────────────────────────────────
-openai==1.59.3
 python-telegram-bot==21.10.1
