@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
+import os
 from loguru import logger
 
 from app.core.config import settings
@@ -55,6 +58,11 @@ app.include_router(ota.router)
 app.include_router(digest.router)
 app.include_router(cohorts.router)
 
+# ── Static files (mobile trigger page) ────────────────────────────────────────
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/api/health", tags=["Health"])
@@ -62,9 +70,15 @@ async def health():
     return {"status": "ok", "service": "GalaxyPulse API", "version": "1.0.0"}
 
 
+@app.get("/trigger", include_in_schema=False)
+async def trigger_page():
+    """Mobile trigger page — open on phone to tap-trigger feedback."""
+    return FileResponse(os.path.join(static_dir, "trigger.html"))
+
+
 @app.get("/", include_in_schema=False)
 async def root():
-    return {"message": "GalaxyPulse API — see /docs for the full API reference"}
+    return {"message": "GalaxyPulse API — see /docs or /trigger"}
 
 
 # ── Scheduler debug endpoints (demo helpers) ──────────────────────────────────

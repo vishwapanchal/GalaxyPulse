@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GalaxyPulse</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a1a;color:#e0e0ff;min-height:100vh;padding:16px}
+h1{font-size:22px;text-align:center;margin:12px 0 4px;background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;font-size:13px;color:#888;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:400px;margin:0 auto}
+.card{background:linear-gradient(145deg,#1a1a3e,#12122a);border:1px solid #2a2a5a;border-radius:16px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.card:active{transform:scale(0.95);border-color:#7c3aed;background:linear-gradient(145deg,#2a1a5e,#1a1240)}
+.card.sent{border-color:#06b6d4;background:linear-gradient(145deg,#0a2a3e,#0a1a2a)}
+.card.sent::after{content:'✅';position:absolute;top:6px;right:8px;font-size:14px}
+.icon{font-size:36px;margin-bottom:8px;display:block}
+.name{font-size:13px;font-weight:600;color:#c8c8ff}
+.ctx{margin:20px auto 0;max-width:400px;background:#12122a;border-radius:12px;padding:14px;border:1px solid #1a1a3e}
+.ctx-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#aaa}
+.ctx-val{color:#7c3aed;font-weight:600}
+.status{text-align:center;margin:16px 0;font-size:14px;min-height:20px;color:#06b6d4}
+.tip{text-align:center;font-size:11px;color:#555;margin-top:16px}
+</style>
+</head>
+<body>
+
+<h1>🌌 GalaxyPulse</h1>
+<p class="sub">Tap the app you just used</p>
+
+<div class="grid" id="grid"></div>
+<div class="status" id="status"></div>
+
+<div class="ctx" id="ctx">
+  <div class="ctx-row"><span>🕐 Time</span><span class="ctx-val" id="c-time">—</span></div>
+  <div class="ctx-row"><span>😰 Stress</span><span class="ctx-val" id="c-stress">—</span></div>
+  <div class="ctx-row"><span>🔋 Battery</span><span class="ctx-val" id="c-bat">—</span></div>
+  <div class="ctx-row"><span>😴 Sleep</span><span class="ctx-val" id="c-sleep">—</span></div>
+</div>
+
+<p class="tip">Add to Home Screen for one-tap access.<br>Bot will message you on Telegram automatically.</p>
+
+<script>
+const CHAT_ID = 6536013557;
+const APPS = [
+  {icon:'🔍',name:'Google Lens',pkg:'com.google.ar.lens'},
+  {icon:'🌐',name:'Google Translate',pkg:'com.google.android.apps.translate'},
+  {icon:'📸',name:'Google Photos',pkg:'com.google.android.apps.photos'},
+  {icon:'⭕',name:'Circle to Search',pkg:'com.google.android.googlequicksearchbox'},
+  {icon:'✏️',name:'Gboard Smart',pkg:'com.google.android.inputmethod.latin'},
+  {icon:'🧹',name:'AI Photo Erase',pkg:'com.samsung.android.photostudio'},
+  {icon:'📝',name:'Note Assist',pkg:'com.samsung.android.app.notes'},
+  {icon:'🗣️',name:'Live Translate',pkg:'com.samsung.android.livestranslate'},
+];
+
+function getHealth(){
+  const h=new Date().getHours();
+  const tod=h<6?'night':h<12?'morning':h<17?'afternoon':h<22?'evening':'night';
+  let stress=40;
+  if(tod==='night')stress+=30;else if(tod==='evening')stress+=15;else if(tod==='morning')stress-=10;
+  const bat=Math.round(navigator.getBattery?80:80);
+  const sleep={morning:82,afternoon:75,evening:68,night:45}[tod];
+  if(navigator.getBattery){
+    navigator.getBattery().then(b=>{
+      document.getElementById('c-bat').textContent=Math.round(b.level*100)+'%'+(b.charging?' ⚡':'');
+      if(b.level<0.2&&!b.charging)stress+=25;
+    });
+  }
+  document.getElementById('c-time').textContent=tod;
+  document.getElementById('c-stress').textContent=stress+'/100';
+  document.getElementById('c-bat').textContent=bat+'%';
+  document.getElementById('c-sleep').textContent=sleep+'/100';
+  return {time_of_day:tod,stress_score:stress,battery_level:bat,sleep_score:sleep,heart_rate:70,steps_today:3000};
+}
+
+const grid=document.getElementById('grid');
+APPS.forEach(app=>{
+  const d=document.createElement('div');
+  d.className='card';
+  d.innerHTML=`<span class="icon">${app.icon}</span><span class="name">${app.name}</span>`;
+  d.onclick=()=>trigger(app,d);
+  grid.appendChild(d);
+});
+
+async function trigger(app,el){
+  if(el.classList.contains('sent'))return;
+  const st=document.getElementById('status');
+  st.textContent='Sending...';
+  const health=getHealth();
+  try{
+    const r=await fetch('/api/feedback/trigger',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:CHAT_ID,feature:app.name,health_context:health})
+    });
+    if(r.ok){
+      st.textContent='✅ Check Telegram!';
+      el.classList.add('sent');
+      setTimeout(()=>{el.classList.remove('sent');st.textContent=''},60000);
+    }else{
+      st.textContent='⚠️ Error: '+r.status;
+    }
+  }catch(e){
+    st.textContent='❌ '+e.message;
+  }
+}
+
+getHealth();
+setInterval(getHealth,60000);
+</script>
+</body>
+</html>
