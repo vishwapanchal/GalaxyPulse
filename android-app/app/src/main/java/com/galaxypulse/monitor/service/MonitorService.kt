@@ -51,7 +51,7 @@ class MonitorService : Service() {
         "com.oneplus.gallery" to "OnePlus Gallery AI"
     )
     
-    private val cooldownMs = 1000L // 1 second (fast demo)
+    private val cooldownMs = 60000L // 1 minute
     private val pollIntervalMs = 1000L // 1 second
     
     companion object {
@@ -174,25 +174,38 @@ class MonitorService : Service() {
                 val reasons = mutableListOf<String>()
                 var willAsk = true
                 
-                if (healthContext.timeOfDay == "night") {
-                    reasons.add("🌙 It's nighttime")
-                    willAsk = false
-                }
-                
-                if (healthContext.stressScore > 75) {
-                    reasons.add("😰 High stress detected (${healthContext.stressScore}/100)")
-                    willAsk = false
-                }
-                
+                // Rule 1: Battery dying (< 15%)
                 if (healthContext.batteryLevel < 15 && !healthContext.batteryCharging) {
                     reasons.add("🔋 Low battery (${healthContext.batteryLevel}%)")
                     willAsk = false
                 }
                 
+                // Rule 2: DND is on
+                if (healthContext.isDndEnabled) {
+                    reasons.add("🔕 Do Not Disturb is ON")
+                    willAsk = false
+                }
+                
+                // Rule 3: Night time
+                if (healthContext.timeOfDay == "night") {
+                    reasons.add("🌙 It's nighttime")
+                    willAsk = false
+                }
+                
+                // Rule 4: CPU under heavy load (Proxy: Memory > 85%)
+                if (healthContext.memoryUsedPercent > 85) {
+                    reasons.add("⚙️ High system load (${healthContext.memoryUsedPercent}%)")
+                    willAsk = false
+                }
+                
+                // Rule 5: User on a call
+                if (healthContext.isOnCall) {
+                    reasons.add("📞 User is on a call")
+                    willAsk = false
+                }
+                
                 if (willAsk) {
-                    reasons.add("⏰ Time: ${healthContext.timeOfDay}")
-                    reasons.add("😌 Stress: ${healthContext.stressScore}/100")
-                    reasons.add("🔋 Battery: ${healthContext.batteryLevel}%${if (healthContext.batteryCharging) " (charging)" else ""}")
+                    reasons.add("✅ Device conditions optimal")
                 }
                 
                 val systemInfo = systemInfoCollector.collectSystemInfo()

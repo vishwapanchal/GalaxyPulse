@@ -89,12 +89,20 @@ class TriggerRequest(BaseModel):
     chat_id: int
     feature: str
     health_context: dict
+    decision: Optional[str] = None
+    explanation: Optional[str] = None
 
 @router.post("/trigger", status_code=status.HTTP_202_ACCEPTED)
 async def trigger_feedback(payload: TriggerRequest):
     """Trigger a real Telegram conversation from the Android agent."""
     from app.services.telegram_bot import trigger_conversation
-    success = await trigger_conversation(payload.chat_id, payload.feature, payload.health_context)
+    success = await trigger_conversation(
+        payload.chat_id, 
+        payload.feature, 
+        payload.health_context,
+        payload.decision,
+        payload.explanation
+    )
     if not success:
         raise HTTPException(status_code=500, detail="Failed to start Telegram conversation")
     return {"status": "started"}

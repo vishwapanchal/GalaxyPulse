@@ -58,7 +58,10 @@ data class HealthContext(
     @SerializedName("heart_rate") val heartRate: Int,
     @SerializedName("steps_today") val stepsToday: Int,
     @SerializedName("battery_level") val batteryLevel: Int,
-    @SerializedName("battery_charging") val batteryCharging: Boolean
+    @SerializedName("battery_charging") val batteryCharging: Boolean,
+    @SerializedName("is_dnd_enabled") val isDndEnabled: Boolean = false,
+    @SerializedName("is_on_call") val isOnCall: Boolean = false,
+    @SerializedName("memory_used_percent") val memoryUsedPercent: Int = 0
 )
 
 data class FeedbackTriggerRequest(

@@ -402,12 +402,24 @@ async def stop_telegram_bot():
         logger.info("🤖 Telegram Bot stopped")
 
 
-async def trigger_conversation(chat_id: int, feature: str, health_context: dict):
+async def trigger_conversation(chat_id: int, feature: str, health_context: dict, decision: str = "ask", explanation: str = ""):
     """Trigger a real 2-turn feedback conversation via Telegram with LLM-generated questions."""
     global tg_application
     if not tg_application:
         logger.error("Telegram bot is not running. Cannot send message.")
         return False
+
+    # Always send the explanation if provided, so judges can see the reasoning
+    if explanation:
+        try:
+            await tg_application.bot.send_message(chat_id=chat_id, text=explanation)
+        except Exception as e:
+            logger.error(f"Failed to send explanation to Telegram: {e}")
+
+    # If the decision from the APK is to skip, we do not start the session
+    if decision == "skip":
+        logger.info(f"Skipping feedback for {chat_id} based on APK decision.")
+        return True
 
     active_sessions[chat_id] = {
         "feature": feature,

@@ -84,9 +84,32 @@ class SystemInfoCollector(private val context: Context) {
             heartRate = estimateHeartRate(),
             stepsToday = getStepsToday(),
             batteryLevel = getBatteryLevel(),
-            batteryCharging = isBatteryCharging()
+            batteryCharging = isBatteryCharging(),
+            isDndEnabled = isDndEnabled(),
+            isOnCall = isOnCall(),
+            memoryUsedPercent = getMemoryUsedPercent()
         )
     }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Device State Helpers
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    private fun isDndEnabled(): Boolean {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+        } else {
+            false
+        }
+    }
+    
+    private fun isOnCall(): Boolean {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        return audioManager.mode == android.media.AudioManager.MODE_IN_CALL || 
+               audioManager.mode == android.media.AudioManager.MODE_IN_COMMUNICATION
+    }
+
     
     // ═══════════════════════════════════════════════════════════════════════════
     // Device Info
