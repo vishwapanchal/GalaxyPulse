@@ -1,6 +1,55 @@
-# deferred_sessions.yaml
 sessions:
-  - feature: "circle_to_search"
-    original_trigger_time: "2026-05-07T10:15:00+05:30"
-    reason: "stress_score_high"
-    rescheduled_for: "2026-05-07T12:15:00+05:30"
+  - feature: circle_to_search
+    original_trigger_time: 2026-05-07T10:15:00+05:30
+    reason: stress_score_high
+    rescheduled_for: 2026-05-07T12:15:00+05:30
+  - feature: circle_to_search
+    original_trigger_time: 2026-05-09T10:09:38.385Z
+    reason: low_battery
+    detail: battery=14%
+    rescheduled_for: skipped
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:18:30.191Z
+    reason: low_battery
+    detail: battery=12%
+    rescheduled_for: skipped
+  - feature: circle_to_search
+    original_trigger_time: 2026-05-09T10:21:26.006Z
+    reason: low_battery
+    detail: battery=11%
+    rescheduled_for: skipped
+  - feature: circle_to_search
+    original_trigger_time: 2026-05-09T10:26:12.627Z
+    reason: low_battery
+    detail: battery=10%
+    rescheduled_for: skipped
+  - feature: circle_to_search
+    original_trigger_time: 2026-05-09T10:31:01.497Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:31:01.497Z
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:34:35.922Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:34:35.922Z
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:35:35.927Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:35:35.927Z
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:36:36.231Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:36:36.231Z
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:37:36.971Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:37:36.971Z
+  - feature: oneplus_gallery_ai
+    original_trigger_time: 2026-05-09T10:38:37.487Z
+    reason: stress_score_high
+    detail: stress=80
+    rescheduled_for: 2026-05-09T12:38:37.487Z
