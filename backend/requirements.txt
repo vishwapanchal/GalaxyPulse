@@ -42,3 +42,4 @@ pytest-asyncio==1.3.0
 
 # ── Third Party APIs ──────────────────────────────────────────────────────────
 python-telegram-bot==22.7
+apscheduler==3.10.4
