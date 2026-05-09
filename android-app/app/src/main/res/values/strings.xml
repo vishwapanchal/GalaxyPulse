@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GalaxyPulse Monitor</string>
+    <string name="notification_title">GalaxyPulse Monitor</string>
+    <string name="notification_text">Monitoring AI app usage</string>
+    <string name="team_name">SeriousVibeCoders</string>
+    <string name="default_backend_url">https://galaxypulse.onrender.com</string>
+    <string name="telegram_bot_username">galaxypulseprobot</string>
+</resources>

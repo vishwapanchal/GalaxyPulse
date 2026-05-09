@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Samsung Prism + OpenClaw Premium Color Palette -->
+    
+    <!-- Primary Prism Colors -->
+    <color name="prism_primary">#6B4EFF</color>
+    <color name="prism_primary_dark">#4A2FE8</color>
+    <color name="prism_primary_light">#8B6FFF</color>
+    
+    <!-- Cosmic Gradient Colors -->
+    <color name="cosmic_purple">#7B2FF7</color>
+    <color name="cosmic_blue">#4D7CFE</color>
+    <color name="cosmic_cyan">#00D9FF</color>
+    <color name="cosmic_pink">#FF3D9A</color>
+    
+    <!-- Background Colors -->
+    <color name="background_primary">#0A0E27</color>
+    <color name="background_secondary">#141B3D</color>
+    <color name="background_tertiary">#1E2749</color>
+    <color name="background_card">#1A2142</color>
+    
+    <!-- Surface Colors with transparency -->
+    <color name="surface_glass">#CC1A2142</color>
+    <color name="surface_glass_light">#4D2A3562</color>
+    <color name="surface_glass_dark">#990A0E27</color>
+    <color name="surface_elevated">#242D52</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent_success">#00E676</color>
+    <color name="accent_warning">#FFB300</color>
+    <color name="accent_error">#FF3D71</color>
+    <color name="accent_info">#00D9FF</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B8C5E0</color>
+    <color name="text_tertiary">#7A8BAA</color>
+    <color name="text_disabled">#4A5A7A</color>
+    
+    <!-- Overlay Colors -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40FFFFFF</color>
+    
+    <!-- Shimmer/Glow Colors -->
+    <color name="glow_primary">#4D6B4EFF</color>
+    <color name="glow_secondary">#4D00D9FF</color>
+    
+    <!-- Legacy Support -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+</resources>
