@@ -209,8 +209,39 @@ class MonitorService : Service() {
                 }
                 
                 val systemInfo = systemInfoCollector.collectSystemInfo()
-                val decision = if (willAsk) "✅ ASKING FOR FEEDBACK" else "❌ SKIPPING FEEDBACK"
-                val explanation = "$decision\n\nApp: $featureName\n\nReasons:\n${reasons.joinToString("\n")}\n\nSystem Info:\n${formatSystemInfo(systemInfo)}"
+                
+                val explanationBuilder = StringBuilder()
+                explanationBuilder.append("GalaxyPulse System Analysis 🔬\n")
+                explanationBuilder.append("App Detected: $featureName\n\n")
+                
+                if (willAsk) {
+                    explanationBuilder.append("Understanding your context is our priority. Based on our analysis, conditions are optimal for feedback.\n\n")
+                } else {
+                    explanationBuilder.append("Understanding your context is our priority. Based on our analysis, we will NOT interrupt you right now.\n\n")
+                }
+                
+                explanationBuilder.append("❤️ Biometric & Health Proxy:\n")
+                explanationBuilder.append("• Estimated Stress: ${healthContext.stressScore}/100\n")
+                explanationBuilder.append("• Sleep Quality: ${healthContext.sleepScore}\n")
+                explanationBuilder.append("• Heart Rate: ${healthContext.heartRate} bpm\n\n")
+                
+                explanationBuilder.append("📱 Device Context:\n")
+                explanationBuilder.append("• Battery: ${healthContext.batteryLevel}% ${if(healthContext.batteryLevel < 15) "🪫" else "🔋"}\n")
+                explanationBuilder.append("• Focus Mode (DND): ${if(healthContext.isDndEnabled) "ON 🔕" else "OFF 🔔"}\n")
+                explanationBuilder.append("• CPU Load: ${healthContext.memoryUsedPercent}% ⚙️\n")
+                explanationBuilder.append("• Time: ${healthContext.timeOfDay.capitalize()} ⏰\n")
+                explanationBuilder.append("• Call Status: ${if(healthContext.isOnCall) "Active 📞" else "Idle"}\n\n")
+                
+                if (willAsk) {
+                    explanationBuilder.append("✅ Action: Initiating feedback session.\n")
+                    explanationBuilder.append("Reason: All device and health parameters are within optimal ranges.")
+                } else {
+                    explanationBuilder.append("❌ Action: Deferring feedback request.\n")
+                    explanationBuilder.append("Reason: ${reasons.joinToString(" AND ")}.\n")
+                    explanationBuilder.append("Your peace of mind is more important than our feedback. We'll catch up later!")
+                }
+                
+                val explanation = explanationBuilder.toString()
                 
                 val request = FeedbackTriggerRequest(
                     chatId = chatId,
