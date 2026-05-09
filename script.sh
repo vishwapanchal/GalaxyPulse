@@ -34,12 +34,22 @@ warn()    { echo -e "${YELLOW}[WARN]${RESET}  $*"; }
 error()   { echo -e "${RED}[ERROR]${RESET} $*"; exit 1; }
 
 # ── Banner ────────────────────────────────────────────────────────────────────
-echo -e "${BOLD}"
-echo "  ╔══════════════════════════════════════════╗"
-echo "  ║   🌌  GalaxyPulse — Bringing Live        ║"
-echo "  ║   Feedback Intelligence for Galaxy AI    ║"
-echo "  ╚══════════════════════════════════════════╝"
+echo -e "${BOLD}${CYAN}"
+echo "   ██████╗  █████╗ ██╗      █████╗ ██╗  ██╗██╗   ██╗"
+echo "  ██╔════╝ ██╔══██╗██║     ██╔══██╗╚██╗██╔╝╚██╗ ██╔╝"
+echo "  ██║  ███╗███████║██║     ███████║ ╚███╔╝  ╚████╔╝ "
+echo "  ██║   ██║██╔══██║██║     ██╔══██║ ██╔██╗   ╚██╔╝  "
+echo "  ╚██████╔╝██║  ██║███████╗██║  ██║██╔╝ ██╗   ██║   "
+echo "   ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   "
+echo -e "${RESET}${BOLD}${YELLOW}"
+echo "   ██████╗ ██╗   ██╗██╗     ███████╗███████╗"
+echo "   ██╔══██╗██║   ██║██║     ██╔════╝██╔════╝"
+echo "   ██████╔╝██║   ██║██║     ███████╗█████╗  "
+echo "   ██╔═══╝ ██║   ██║██║     ╚════██║██╔══╝  "
+echo "   ██║     ╚██████╔╝███████╗███████║███████╗"
+echo "   ╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝"
 echo -e "${RESET}"
+echo -e "${BOLD}${CYAN}   [ COMMAND CENTER INITIALIZATION SEQUENCE ]${RESET}\n"
 
 # ── Sync root .env → backend/.env ────────────────────────────────────────────
 if [ -f "$ROOT_DIR/.env" ]; then
@@ -116,6 +126,18 @@ for i in {1..20}; do
   fi
 done
 
+# ── Start OpenClaw Gateway ─────────────────────────────────────────────────────
+echo ""
+info "Starting OpenClaw Gateway Agent..."
+cd "$ROOT_DIR/agent"
+if [ "$SKIP_INSTALL" = false ] && [ ! -d "node_modules" ]; then
+  info "Installing OpenClaw dependencies..."
+  npm install -q
+fi
+node server.js > "$LOG_DIR/agent.log" 2>&1 &
+AGENT_PID=$!
+success "OpenClaw Gateway started (PID $AGENT_PID) → http://localhost:3001"
+
 # ── Start Frontend ────────────────────────────────────────────────────────────
 if [ "$SKIP_FRONTEND" = false ]; then
   echo ""
@@ -131,7 +153,13 @@ if [ "$SKIP_FRONTEND" = false ]; then
       success "Frontend dependencies installed"
     fi
 
-    npm run dev > "$LOG_DIR/frontend.log" 2>&1 &
+    if [ -d ".next" ]; then
+      info "Found optimized build, starting production Command Center..."
+      npm start > "$LOG_DIR/frontend.log" 2>&1 &
+    else
+      info "Starting development Command Center..."
+      npm run dev > "$LOG_DIR/frontend.log" 2>&1 &
+    fi
     FRONTEND_PID=$!
     success "Frontend started (PID $FRONTEND_PID) → http://localhost:3000"
   fi
@@ -139,32 +167,35 @@ fi
 
 # ── Live summary ──────────────────────────────────────────────────────────────
 echo ""
-echo -e "${BOLD}${GREEN}═══════════════════════════════════════════${RESET}"
-echo -e "${BOLD}  ✅  GalaxyPulse is LIVE!${RESET}"
-echo -e "${GREEN}═══════════════════════════════════════════${RESET}"
-echo -e "  📡  Backend API   →  ${CYAN}http://localhost:8000${RESET}"
-echo -e "  📖  API Docs      →  ${CYAN}http://localhost:8000/docs${RESET}"
+echo -e "${BOLD}${CYAN}╒════════════════════════════════════════════════════════════════╕${RESET}"
+echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}${GREEN}SYSTEM ONLINE — GALAXYPULSE CORE ACTIVE${RESET}                       ${BOLD}${CYAN}│${RESET}"
+echo -e "${BOLD}${CYAN}╘════════════════════════════════════════════════════════════════╛${RESET}"
+echo -e "  ${CYAN}▶${RESET} Backend Neural API →  ${BOLD}http://localhost:8000${RESET}"
+echo -e "  ${CYAN}▶${RESET} OpenClaw Gateway   →  ${BOLD}http://localhost:3001${RESET}"
+echo -e "  ${CYAN}▶${RESET} API Documentation  →  ${BOLD}http://localhost:8000/docs${RESET}"
 if [ "$SKIP_FRONTEND" = false ] && command -v node &>/dev/null; then
-echo -e "  🖥️   Dashboard     →  ${CYAN}http://localhost:3000${RESET}"
+echo -e "  ${CYAN}▶${RESET} Command Center UI  →  ${BOLD}http://localhost:3000${RESET}"
 fi
-echo -e "  🤖  Telegram Bot  →  ${CYAN}Send /start to your bot${RESET}"
-echo -e "  📜  Backend log   →  ${YELLOW}logs/backend.log${RESET}"
-echo -e "  📜  Frontend log  →  ${YELLOW}logs/frontend.log${RESET}"
+echo -e "  ${CYAN}▶${RESET} Telegram Agent     →  ${BOLD}Send /start to your bot${RESET}"
+echo -e "  ${CYAN}▶${RESET} Backend Log Stream →  ${YELLOW}logs/backend.log${RESET}"
+echo -e "  ${CYAN}▶${RESET} OpenClaw Log       →  ${YELLOW}logs/agent.log${RESET}"
+echo -e "  ${CYAN}▶${RESET} Frontend UI Log    →  ${YELLOW}logs/frontend.log${RESET}"
 echo ""
-echo -e "  ${BOLD}Demo flow:${RESET}"
-echo -e "    1. Open Telegram → message your bot"
-echo -e "    2. Send: /use Google Lens"
-echo -e "    3. Answer the 2 LLM-generated questions"
-echo -e "    4. Watch the dashboard populate in real-time!"
+echo -e "  ${BOLD}Demo Sequence:${RESET}"
+echo -e "    1. Access Telegram and interface with the Bot"
+echo -e "    2. Transmit: ${CYAN}/use Google Lens${RESET}"
+echo -e "    3. Complete the neural-generated feedback loop"
+echo -e "    4. Observe real-time telemetry on the Command Center"
 echo ""
-echo -e "  ${YELLOW}Press [CTRL+C] to stop all servers${RESET}"
-echo -e "${GREEN}═══════════════════════════════════════════${RESET}"
+echo -e "  ${YELLOW}Press [CTRL+C] to abort sequence and terminate all processes${RESET}"
+echo -e "${CYAN}══════════════════════════════════════════════════════════════════${RESET}"
 
 # ── Graceful shutdown ─────────────────────────────────────────────────────────
 cleanup() {
   echo ""
   info "Shutting down GalaxyPulse..."
   [ -n "$BACKEND_PID"  ] && kill "$BACKEND_PID"  2>/dev/null && info "Backend stopped"
+  [ -n "$AGENT_PID"    ] && kill "$AGENT_PID"    2>/dev/null && info "OpenClaw Gateway stopped"
   [ -n "$FRONTEND_PID" ] && kill "$FRONTEND_PID" 2>/dev/null && info "Frontend stopped"
   success "All services stopped. Goodbye! 👋"
   exit 0

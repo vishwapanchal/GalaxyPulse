@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/ui/Sidebar";
 
 export const metadata: Metadata = {
   title: "GalaxyPulse — Galaxy AI Feedback Intelligence",
@@ -11,11 +10,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen bg-surface-900">
-        <Sidebar />
-        <main className="flex-1 relative w-full">
-          {children}
-        </main>
+      <body className="bg-surface-900 min-h-screen">
+        {children}
       </body>
     </html>
   );

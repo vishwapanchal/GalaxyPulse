@@ -187,6 +187,18 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg, parse_mode="Markdown")
 
 
+async def cmd_getchatid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /getchatid command — returns the user's Chat ID."""
+    chat_id = update.effective_chat.id
+    msg = (
+        f"🤖 *Your Telegram Chat ID is:*\n\n"
+        f"`{chat_id}`\n\n"
+        f"Tap the number above to copy it, then paste it into the GalaxyPulse Android App settings!"
+    )
+    await update.message.reply_text(msg, parse_mode="Markdown")
+    logger.info(f"User {chat_id} requested their Chat ID")
+
+
 async def cmd_use(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /use <feature> command — trigger a real feedback session."""
     chat_id = update.effective_chat.id
@@ -371,6 +383,8 @@ async def start_telegram_bot():
     tg_application.add_handler(CommandHandler("use", cmd_use))
     tg_application.add_handler(CommandHandler("features", cmd_features))
     tg_application.add_handler(CommandHandler("status", cmd_status))
+    tg_application.add_handler(CommandHandler("getchatid", cmd_getchatid))
+    tg_application.add_handler(CommandHandler("getid", cmd_getchatid))
 
     # Register message handler (for conversation replies)
     tg_application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
@@ -386,6 +400,7 @@ async def start_telegram_bot():
             BotCommand("use", "Give feedback on a feature (e.g. /use Google Lens)"),
             BotCommand("features", "List all trackable features"),
             BotCommand("status", "Your feedback stats"),
+            BotCommand("getchatid", "Get your Telegram Chat ID for the Android app"),
         ])
     except Exception as e:
         logger.warning(f"Failed to set bot commands menu: {e}")

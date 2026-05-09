@@ -17,6 +17,7 @@ import com.galaxypulse.monitor.MainActivity
 import com.galaxypulse.monitor.R
 import com.galaxypulse.monitor.data.FeedbackTriggerRequest
 import com.galaxypulse.monitor.utils.SystemInfoCollector
+import com.galaxypulse.monitor.utils.LogManager
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -148,9 +149,7 @@ class MonitorService : Service() {
     }
     
     private fun logToUI(message: String) {
-        val existing = prefs.getString("service_log", "") ?: ""
-        val newLog = if (existing.isEmpty()) message else "$existing||$message"
-        prefs.edit().putString("service_log", newLog).apply()
+        LogManager.addLog(message)
     }
     
     private fun sendDecisionExplanation(
@@ -256,7 +255,9 @@ class MonitorService : Service() {
                 val body = json.toRequestBody("application/json".toMediaType())
                 
                 val httpRequest = Request.Builder()
-                    .url("$backendUrl/api/feedback/trigger")
+                    .url("$backendUrl/openclaw/trigger")
+                    .header("X-OpenClaw-Agent", "Android-Native")
+                    .header("X-OpenClaw-Version", "1.0.0")
                     .post(body)
                     .build()
                 
@@ -264,11 +265,11 @@ class MonitorService : Service() {
                 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
-                        updateNotification("✅ Sent: $featureName")
-                        logToUI("✅ Sent to Telegram: $featureName")
+                        updateNotification("✅ Sent to OpenClaw: $featureName")
+                        logToUI("✅ OpenClaw processing: $featureName")
                     } else {
-                        updateNotification("❌ Backend error: ${response.code}")
-                        logToUI("❌ Backend error: ${response.code}")
+                        updateNotification("❌ OpenClaw error: ${response.code}")
+                        logToUI("❌ OpenClaw error: ${response.code}")
                     }
                 }
                 

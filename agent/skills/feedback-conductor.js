@@ -136,24 +136,22 @@ function writeFeedbackYAML(feature, healthContext) {
 
 // ── Main Skill Export ─────────────────────────────────────────────────────────
 module.exports = async function feedbackConductor(input) {
-  const { feature, health_context } = input;
+  let { feature, health_context, chat_id, decision, explanation } = input;
   console.log(`[Feedback Conductor] Starting session for ${feature}`);
 
   // Step 1: Check anti-interrupt rules
   const deferResult = shouldDefer(feature, health_context);
   if (deferResult.defer) {
-    return { 
-      status: "deferred", 
-      reason: deferResult.reason,
-      reschedule_hours: deferResult.hours
-    };
+    decision = "skip";
+    explanation = (explanation ? explanation + "\n" : "") + "🛑 OpenClaw Override: " + deferResult.reason;
+    console.log(`[Feedback Conductor] Deferring session: ${deferResult.reason}`);
   }
 
   // Step 2: Write initial YAML (will be updated by backend after conversation)
   writeFeedbackYAML(feature, health_context);
 
   // Step 3: Trigger real Telegram conversation via backend
-  const chatId = parseInt(TELEGRAM_CHAT_ID);
+  const chatId = parseInt(chat_id) || parseInt(TELEGRAM_CHAT_ID);
   if (!chatId) {
     console.error('[Feedback Conductor] No TELEGRAM_CHAT_ID configured. Cannot trigger conversation.');
     return { status: "error", reason: "no_chat_id" };
@@ -162,7 +160,9 @@ module.exports = async function feedbackConductor(input) {
   const triggerData = {
     chat_id: chatId,
     feature: feature,
-    health_context: health_context
+    health_context: health_context,
+    decision: decision,
+    explanation: explanation
   };
 
   try {

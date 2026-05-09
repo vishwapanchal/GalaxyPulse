@@ -42,6 +42,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".LogActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GalaxyPulse" />
+
         <!-- Foreground Service -->
         <service
             android:name=".service.MonitorService"

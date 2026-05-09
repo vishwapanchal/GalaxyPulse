@@ -26,8 +26,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: SharedPreferences
     private lateinit var systemInfoCollector: SystemInfoCollector
-    private val activityLog = mutableListOf<String>()
-    private val maxLogLines = 100
     
     companion object {
         private const val PREFS_NAME = "galaxypulse_prefs"
@@ -53,19 +51,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun startLogPolling() {
-        // Poll for log updates from the service every second
-        binding.root.postDelayed(object : Runnable {
-            override fun run() {
-                val serviceLog = prefs.getString("service_log", null)
-                if (serviceLog != null && serviceLog.isNotEmpty()) {
-                    serviceLog.split("||").forEach { msg ->
-                        addLog(msg)
-                    }
-                    prefs.edit().remove("service_log").apply()
-                }
-                binding.root.postDelayed(this, 1000)
-            }
-        }, 1000)
+        // No longer polling from SharedPreferences, using LogManager LiveData in LogActivity
     }
     
     private fun animateEntrance() {
@@ -133,31 +119,14 @@ class MainActivity : AppCompatActivity() {
             requestBatteryOptimizationExemption()
         }
         
-        // Clear log button
-        binding.btnClearLog.setOnClickListener {
-            clearLog()
+        // Open Log Viewer
+        binding.btnOpenLogViewer.setOnClickListener {
+            startActivity(Intent(this, LogActivity::class.java))
         }
     }
     
     private fun addLog(message: String) {
-        val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-            .format(java.util.Date())
-        val logEntry = "[$timestamp] $message"
-        
-        activityLog.add(0, logEntry)
-        if (activityLog.size > maxLogLines) {
-            activityLog.removeAt(activityLog.size - 1)
-        }
-        
-        runOnUiThread {
-            binding.tvActivityLog.text = activityLog.joinToString("\n")
-        }
-    }
-    
-    private fun clearLog() {
-        activityLog.clear()
-        binding.tvActivityLog.text = "Log cleared. Waiting for events..."
-        addLog("🗑️ Log cleared")
+        com.galaxypulse.monitor.utils.LogManager.addLog(message)
     }
     
     private fun animateStatusChange(isActive: Boolean) {
@@ -206,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         val chatIdStr = binding.etChatId.text.toString().trim()
         
         if (backendUrl.isEmpty()) {
-            Toast.makeText(this, "Backend URL is required", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "OpenClaw Gateway URL is required", Toast.LENGTH_SHORT).show()
             return
         }
         
